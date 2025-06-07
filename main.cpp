@@ -1,12 +1,10 @@
 #include <iostream>
-#include <string>
-#include <stack>
-#include <cstring>
+#include <string.h>
 
 using namespace std;
 typedef struct tarefa
 {
-  std::string nome;
+  char nome[100];
   int prioridade;
   int tempo;
 } Ttarefa;
@@ -31,45 +29,81 @@ void inicializar(TLista *lista)
 }
 void removerTarefa(TLista *lista, Ttarefa *tarefa)
 {
-  No *iterador = lista->inicio;
-  No *noARemover = NULL;
-  if (lista->inicio->tarefa.nome == tarefa->nome && lista->inicio->tarefa.prioridade == tarefa->prioridade && lista->inicio->tarefa.tempo == tarefa->tempo)
-  {
-    noARemover = lista->inicio;
-    lista->inicio = noARemover->proximo;
-  }
   if (lista->inicio == NULL)
   {
-    lista->fim = NULL;
+    return;
   }
-  else
+
+  No *iterador = lista->inicio;
+  No *noARemover = NULL;
+
+  if (iterador->tarefa.nome == tarefa->nome &&
+      iterador->tarefa.prioridade == tarefa->prioridade &&
+      iterador->tarefa.tempo == tarefa->tempo)
   {
-    while (iterador->proximo != NULL && iterador->proximo->tarefa.nome != tarefa->nome && iterador->proximo->tarefa.prioridade != tarefa->prioridade && iterador->proximo->tarefa.tempo == tarefa->tempo)
+    noARemover = iterador;
+    lista->inicio = iterador->proximo;
+
+    if (lista->inicio == NULL)
     {
-      iterador = iterador->proximo;
+      lista->fim = NULL;
     }
+
+    free(noARemover);
+    lista->tam--;
+    return;
   }
+
+  while (iterador->proximo != NULL &&
+         (iterador->proximo->tarefa.nome != tarefa->nome ||
+          iterador->proximo->tarefa.prioridade != tarefa->prioridade ||
+          iterador->proximo->tarefa.tempo != tarefa->tempo))
+  {
+    iterador = iterador->proximo;
+  }
+
   if (iterador->proximo != NULL)
   {
     noARemover = iterador->proximo;
     iterador->proximo = noARemover->proximo;
+
     if (iterador->proximo == NULL)
     {
       lista->fim = iterador;
     }
-  }
-  if (noARemover)
-  {
+
     free(noARemover);
     lista->tam--;
   }
 }
+
+void removerTarefa(TLista *lista)
+{
+  if (lista->inicio == NULL)
+  {
+    std::cout << "pilha vazia\n";
+    return;
+  }
+
+  No *remover = lista->inicio;
+  lista->inicio = remover->proximo;
+
+  if (lista->inicio == NULL)
+  {
+    lista->fim = NULL;
+  }
+
+  free(remover);
+  lista->tam--;
+ cout << "Tarefa removida com sucesso";
+}
+
 void InserirTarefa(TLista *lista, Ttarefa *tarefa)
 {
   No *novo = (No *)malloc(sizeof(No));
-  novo->tarefa.prioridade = tarefa->prioridade;
-  novo->tarefa.nome = tarefa->nome;
+  strcpy(novo->tarefa.nome, tarefa->nome);
   novo->tarefa.tempo = tarefa->tempo;
+  novo->tarefa.prioridade = tarefa->prioridade;
 
   if (lista->inicio == NULL)
   {
@@ -85,41 +119,12 @@ void InserirTarefa(TLista *lista, Ttarefa *tarefa)
   lista->tam++;
 }
 
-// mostrar item add na pilha
-std::stack<Ttarefa> pilha;
-void mostrarTopoDaPilha(Ttarefa *tarefa)
-{
-  pilha.push({tarefa->nome, tarefa->prioridade, tarefa->tempo});
-  std::cout << "Nome: (pilha) " << pilha.top().nome << "\n";
-  std::cout << "priori (pilha) " << pilha.top().prioridade << "\n";
-  std::cout << "tempo (pilha) " << pilha.top().tempo << "\n";
-}
-
-bool retirarTarefaDaPilha(Ttarefa *tarefa)
-{
-  pilha;
-  if (pilha.empty())
-  {
-    return false;
-  }
-  else
-  {
-    std::cout << "Tirando elemento...\n";
-    std::cout << "Nome: (pilha) " << pilha.top().nome << "\n";
-    std::cout << "priori (pilha) " << pilha.top().prioridade << "\n";
-    std::cout << "tempo (pilha) " << pilha.top().tempo << "\n";
-    pilha.pop();
-    return true;
-  }
-}
-
 void mostrarMenu()
 {
   int input;
   TLista lista;
   Ttarefa tarefa;
   TNo no;
-  bool istrue;
   inicializar(&lista);
 
   do
@@ -136,7 +141,7 @@ void mostrarMenu()
     case 1:
       std::cout << "Adicione uma tarefa:\n";
       std::cout << "Tarefa:\n";
-      std::getline(std::cin, tarefa.nome);
+      std::cin.getline(tarefa.nome,100);
 
       std::cout << "Tempo (min):\n";
       std::cin >> tarefa.tempo;
@@ -145,21 +150,10 @@ void mostrarMenu()
       std::cout << "Prioridade:\n";
       std::cin >> tarefa.prioridade;
       std::cin.ignore();
-
       InserirTarefa(&lista, &tarefa);
-      mostrarTopoDaPilha(&tarefa);
       break;
-
     case 2:
-      istrue = retirarTarefaDaPilha(&tarefa);
-      if (istrue)
-      {
-        removerTarefa(&lista, &tarefa);
-      }
-      else
-      {
-        std::cout << "Nenhuma tarefa adicionada\n";
-      }
+      removerTarefa(&lista);
       break;
     case 3:
 
