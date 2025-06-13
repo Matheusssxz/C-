@@ -232,7 +232,7 @@ void mostrarMenu()
       std::cout << "Prioridade(1 a 5 || enquanto menor o valor maior prioridade || enquanto maior o valor menor prioridade):\n";
       std::cin >> tarefa.prioridade;
       std::cin.ignore();
-      if (tarefa.prioridade > 5)
+      if (tarefa.prioridade > 5 || tarefa.prioridade < 1)
       {
         cout << "Prioridades vao ate 5, favor, adicionar uma prioridade valida";
       }
