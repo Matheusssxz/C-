@@ -95,7 +95,9 @@ void exibirTarefaFila(TLista *lista)
   {
     while (iterador != NULL)
     {
-      std::cout << "Nome: " << iterador->tarefa.nome << "\n";
+      std::cout << "Nome: " << iterador->tarefa.nome
+                << " Tempo: " << iterador->tarefa.tempo
+                << " Prioridade: " << iterador->tarefa.prioridade << "\n";
       iterador = iterador->proximo;
     }
   }
@@ -130,16 +132,78 @@ void bubbleSortLista(TLista *lista)
     lptr = ptr1;
   } while (trocou);
 }
+
 void insertionSort(TLista *lista)
 {
   if (lista->inicio == NULL || lista->inicio->proximo == NULL)
     return;
-    
+
+  TNo *novaLista = NULL;
+  TNo *atual = lista->inicio;
+
+  while (atual != NULL)
+  {
+    TNo *proximo = atual->proximo;
+
+    if (novaLista == NULL || atual->tarefa.tempo < novaLista->tarefa.tempo)
+    {
+      atual->proximo = novaLista;
+      novaLista = atual;
+    }
+    else
+    {
+      TNo *temp = novaLista;
+      while (temp->proximo != NULL && temp->proximo->tarefa.tempo <= atual->tarefa.tempo)
+      {
+        temp = temp->proximo;
+      }
+      atual->proximo = temp->proximo;
+      temp->proximo = atual;
+    }
+
+    atual = proximo;
+  }
+
+  lista->inicio = novaLista;
+  TNo *fim = novaLista;
+  while (fim->proximo != NULL)
+  {
+    fim = fim->proximo;
+  }
+  lista->fim = fim;
+}
+
+void selectionSort(TLista *lista)
+{
+  if (lista->inicio == NULL || lista->inicio->proximo == NULL)
+    return;
+  TNo *i = lista->inicio;
+  while (i != NULL)
+  {
+    TNo *menorstr = i;
+    TNo *j = i->proximo;
+    while (j != NULL)
+    {
+      if (strcmp(j->tarefa.nome, menorstr->tarefa.nome) < 0)
+      {
+        menorstr = j;
+      }
+      j = j->proximo;
+    }
+    if (menorstr != i)
+    {
+      Ttarefa temp = i->tarefa;
+      i->tarefa = menorstr->tarefa;
+      menorstr->tarefa = temp;
+    }
+    i = i->proximo;
+  }
 }
 
 void mostrarMenu()
 {
   int input;
+  int inputTarefaOrdenacao;
   TLista lista;
   Ttarefa tarefa;
   TNo no;
@@ -192,16 +256,26 @@ void mostrarMenu()
         std::cout << "2 - Exibir por prioridade\n";
         std::cout << "3 - Exibir por tempo\n";
         std::cout << "4 - Exibir por nome\n";
-        std::cin >> input;
+        std::cin >> inputTarefaOrdenacao;
         std::cin.ignore();
-        if (input == 1)
+        if (inputTarefaOrdenacao == 1)
         {
           exibirTarefaFila(&lista);
         }
-        else if (input == 2)
+        else if (inputTarefaOrdenacao == 2)
         {
 
           bubbleSortLista(&lista);
+          exibirTarefaFila(&lista);
+        }
+        else if (inputTarefaOrdenacao == 3)
+        {
+          insertionSort(&lista);
+          exibirTarefaFila(&lista);
+        }
+        else
+        {
+          selectionSort(&lista);
           exibirTarefaFila(&lista);
         }
       }
